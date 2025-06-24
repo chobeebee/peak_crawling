@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
@@ -199,7 +200,7 @@ def parse_company_info(driver) -> dict:
     latest_operating_income = financial_history.get(latest_year, {}).get("영업이익", "")
     latest_net_income = financial_history.get(latest_year, {}).get("당기순이익", "")
 
-    return {
+    company_data = {
         "name": name, # 회사명
         "established_year": get_info(driver, "설립일")[:4], # 설립 연도
         "company_type": company_type, # 회사 유형 (주식회사, 유한회사 등)
@@ -232,19 +233,25 @@ def parse_company_info(driver) -> dict:
         "tech_stack": "", # 기술 스택 키워드
         "recent_news": "" # 최근 뉴스/보도자료
     }
+    
+    return company_data
 
+CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 def smart_crawl_jobkorea(company_name: str) -> dict:
     print(f"=== '{company_name}' 기업 정보 수집 시작 ===")
 
     chrome_options = Options()
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument(f"user-agent={USER_AGENT}")
+    chrome_options.add_argument("--log-level=3")
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-    driver = webdriver.Chrome(options=chrome_options)
+    service = Service(executable_path=CHROME_DRIVER_PATH)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # 회사명 비교를 위한 정규화 함수
     def normalize(text: str) -> str:

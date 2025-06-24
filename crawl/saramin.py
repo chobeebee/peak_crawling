@@ -14,13 +14,13 @@ def filtering_company_name(name):
     """
     회사 이름에서 (주), (주식회사) 등 접두사/접미사 및 공백 제거
     """
-    print(f"=== filtering_company_name 함수 실행 ===")
+    # print(f"=== filtering_company_name 함수 실행 ===")
     removal_inc = re.sub(r'\(주\)', '', name, flags=re.IGNORECASE)
     removal_inc = re.sub(r'\(주식회사\)', '', removal_inc, flags=re.IGNORECASE)
 
     removal_inc = re.sub(r'\s+', ' ', removal_inc).strip()
 
-    print(f"filtering_company_name 함수 결과: {removal_inc}")
+    # print(f"filtering_company_name 함수 결과: {removal_inc}")
     return removal_inc
 
 # 기업명 검색, 검색된 기업명 비교
@@ -28,11 +28,11 @@ def compare_company_name(searching_keyword, searched_company):
     """
     두 회사 이름을 (주), (주식회사) 등의 문자열을 제외하고 비교
     """
-    print(f"=== compare_company_name 함수 실행 ===")
+    # print(f"=== compare_company_name 함수 실행 ===")
     filtered_company_name = filtering_company_name(searched_company)
 
     result = searching_keyword == filtered_company_name
-    print(f"searching_keyword == filtered_company_name 결과={result}")
+    # print(f"searching_keyword == filtered_company_name 결과={result}")
     return result
 
 
@@ -59,7 +59,7 @@ def get_financial_info_after_button(driver, target_button_text, wait_time=10):
         if found_button:
             # 3. 버튼 클릭
             found_button.click()
-            print(f"👉 버튼'{target_button_text}' 클릭.")
+            # print(f"👉 버튼'{target_button_text}' 클릭.")
 
             # 4. 페이지 로딩
             wait.until(EC.presence_of_element_located(
@@ -81,7 +81,7 @@ def extract_financial_info(driver, company_data):
     """
     재무현황(매출, 영업이익, 순이익, 자본금)에 대한 재무정보 데이터 추출
     """
-    print(f"=== extract_financial_info 함수 실행 ===")
+    # print(f"=== extract_financial_info 함수 실행 ===")
     # 재무정보 탭으로 이동
     financial_soup = get_financial_info_after_button(driver, "재무정보")
 
@@ -94,7 +94,7 @@ def extract_financial_info(driver, company_data):
         if not field_name_tag:
             continue
         field_name = field_name_tag.text.strip()
-        print(f"👉 field_name = {field_name}")
+        # print(f"👉 field_name = {field_name}")
 
         # 해당 재무 필드의 연도별 데이터 추출
         area_graph = box_finance.find('div', class_='area_graph')
@@ -118,7 +118,7 @@ def extract_financial_info(driver, company_data):
                 elif field_name == "자본금":
                     company_data["financial_history"][year]["자본금"] = value_str
 
-                print(f"✅ {field_name} => 년도{year}:{value_str}")
+                # print(f"✅ {field_name} => 년도{year}:{value_str}")
 
 CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
@@ -196,7 +196,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, '.cnt_result, .corp_name > a'))
             )
-            print("✅ 사람인 검색 결과 페이지 로딩 완료.")
+            # print("✅ 사람인 검색 결과 페이지 로딩 완료.")
         except Exception as e:
             print(f"⚠️ 사람인 검색 결과 페이지 로딩 실패 또는 요소 미발견: {e}")
             print(f"❌ '{search_keyword}'에 대한 검색 결과를 찾을 수 없습니다.")
@@ -215,12 +215,12 @@ def crawl_from_saramin(search_keyword: str) -> dict:
             if match:
                 result_count = int(match.group(0))
         
-        print(f"사람인 검색 결과 수: {result_count}건")
+        # print(f"사람인 검색 결과 수: {result_count}건")
 
         # 1-2. result_count > 0 AND search_keyword == corp_name
         if result_count > 0:
             company_popup_names = soup.select('.company_popup')
-            print(f">> company_popup_names (조회된 개수): {len(company_popup_names)}")
+            # print(f">> company_popup_names (조회된 개수): {len(company_popup_names)}")
 
             # 1-3. 검색 기업명(search_keyword)과 여러 검색 결과 중 기업명(corp_name)이 일치하는 것 선택
             found_match = False
@@ -241,8 +241,8 @@ def crawl_from_saramin(search_keyword: str) -> dict:
                     if company_name_link_suffix:
                         saramin_company_url = requests.compat.urljoin(SARAMIN_BASIC_URL, company_name_link_suffix)
                     
-                    print(f"✅ 사람인에서 찾은 기업명: '{company_data['name']}'")
-                    print(f"✅ 사람인 기업 상세 링크: {saramin_company_url}")
+                    # print(f"✅ 사람인에서 찾은 기업명: '{company_data['name']}'")
+                    # print(f"✅ 사람인 기업 상세 링크: {saramin_company_url}")
                     
                     found_match = True                
                     break
@@ -262,7 +262,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
                 WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '.company_details')) # 상세 정보 컨테이너
                 )
-                print("✅ 회사 상세 페이지 로딩 완료.")
+                # print("✅ 회사 상세 페이지 로딩 완료.")
             except Exception as e:
                 print(f"⚠️ 회사 상세 페이지 로딩 실패 또는 요소 미발견 (URL: {saramin_company_url}): {e}")
                 print("크롤링을 계속 시도하지만, 정보가 불완전할 수 있습니다.")
@@ -344,11 +344,6 @@ def crawl_from_saramin(search_keyword: str) -> dict:
                 company_data["latest_revenue"] = latest_financial_data.get("매출액")
                 company_data["latest_operating_income"] = latest_financial_data.get("영업이익")
                 company_data["latest_net_income"] = latest_financial_data.get("당기순이익")
-
-                print(f"최근 회계연도: {company_data['latest_fiscal_year']}")
-                print(f"최근 매출액: {company_data['latest_revenue']}")
-                print(f"최근 영업이익: {company_data['latest_operating_income']}")
-                print(f"최근 순이익: {company_data['latest_net_income']}")
             else:
                 print("🚫 financial_history가 비어 있어 최신 재무 정보를 추출할 수 없습니다.")
 
@@ -360,7 +355,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
         if driver:
             driver.quit()
             print("✅ Chrome 드라이버 종료.")
-    
+
     return company_data
 
 
@@ -373,4 +368,3 @@ if __name__ == "__main__":
 
     print("\n--- 크롤링 결과 ---")
     print(json.dumps(crawled_data, indent=2, ensure_ascii=False))
-    print("==================================\n")
