@@ -179,7 +179,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
 
         service = Service(executable_path=CHROME_DRIVER_PATH)
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        # print("✅ Chrome 드라이버 초기화 성공.")
+        print("✅ Chrome 드라이버 초기화 성공.")
         
         SARAMIN_BASIC_URL = "https://www.saramin.co.kr"
         # 검색어 URL 인코딩 및 검색 URL 생성
