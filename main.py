@@ -1,6 +1,6 @@
 # main.py
-from crawl_jobkorea import smart_crawl_jobkorea
-from db_mysql import save_raw_data
+from crawl.jobkorea import smart_crawl_jobkorea
+from db.db_mysql import save_raw_data
 
 company_name = input("회사명을 입력하세요: ")
 
