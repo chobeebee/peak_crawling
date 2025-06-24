@@ -17,7 +17,25 @@ def merge_company_info (jobkorea_data: dict, saramin_data: dict) -> dict :
 
         if key == "is_listed":
             merged_data[key] = bool(jobkorea_value) or bool(saramin_value)
+        
+        # financial_history 처리
+        elif key == "financial_history":
+            merged_data[key] = {}
 
+            # 잡코리아 기준 먼저 복사
+            for year, jobkorea_year_data in jobkorea_value.items():
+                merged_data[key][year] = jobkorea_year_data.copy()
+
+            # 사람인 연도별 병합
+            for year, saramin_year_data in saramin_value.items():
+                if year not in merged_data[key]:
+                    merged_data[key][year] = saramin_year_data
+                else:
+                    for metric, value in saramin_year_data.items():
+                        if metric not in merged_data[key][year] or is_empty(merged_data[key][year][metric]):
+                            merged_data[key][year][metric] = value
+
+        # 일반 필드 처리
         elif is_empty(jobkorea_value) and not is_empty(saramin_value):
             merged_data[key] = saramin_value
 
