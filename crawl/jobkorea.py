@@ -1,12 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json, time
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # 공통 유틸 함수
 """ 기업정보 영역 """
@@ -125,7 +126,7 @@ def get_financial_history(driver) -> dict:
 
         return data_by_year
     except:
-        return ""
+        return {}
     
 
 """ 재무분석 카드 그래프 """
@@ -236,7 +237,6 @@ def parse_company_info(driver) -> dict:
     
     return company_data
 
-# CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 def smart_crawl_jobkorea(company_name: str) -> dict:
@@ -251,7 +251,7 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
     chrome_options.add_argument("--enable-unsafe-swiftshader")
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
 
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
 
     # 회사명 비교를 위한 정규화 함수
     def normalize(text: str) -> str:

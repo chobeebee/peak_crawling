@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>네이버 기업 보고서</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #0052cc;
+        --text-color: #172b4d;
+        --subtle-text-color: #5e6c84;
+        --background-color: #f4f5f7;
+        --surface-color: #ffffff;
+        --border-color: #dfe1e6;
+        --positive-bg: #e3fcef;
+        --positive-text: #006644;
+        --negative-bg: #ffebe6;
+        --negative-text: #de350b;
+        --neutral-bg: #e6f4ff;
+        --neutral-text: #0052cc;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background: var(--background-color);
+      }
+
+      .container {
+        max-width: 960px;
+        margin: 40px auto;
+        background: var(--surface-color);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
+      }
+
+      .header {
+        padding: 50px;
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.03em;
+      }
+
+      .header .subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 400;
+      }
+
+      .content {
+        padding: 50px;
+      }
+
+      .section {
+        margin-bottom: 56px;
+      }
+
+      .section h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 28px;
+        letter-spacing: -0.02em;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .grid {
+        display: grid;
+        gap: 28px;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .card {
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--surface-color);
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: 0 6px 16px rgba(0, 82, 204, 0.2);
+      }
+
+      .card h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--subtle-text-color);
+        margin-bottom: 8px;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .card p {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 500;
+        word-break: break-all;
+      }
+
+      .description {
+        padding: 32px;
+        background: #f4f5f7;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--text-color);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+      }
+
+      .metric {
+        padding: 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: left;
+        border: 1px solid transparent;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+
+      .metric.positive {
+        background: var(--positive-bg);
+        color: var(--positive-text);
+        border-color: #b3f2c7;
+      }
+
+      .metric.negative {
+        background: var(--negative-bg);
+        color: var(--negative-text);
+        border-color: #ffc6b3;
+      }
+
+      .metric.neutral {
+        background: var(--neutral-bg);
+        color: var(--neutral-text);
+        border-color: #b3d4ff;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 24px 0;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      }
+
+      .table th {
+        background: #f4f5f7;
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--subtle-text-color);
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1rem;
+      }
+
+      .table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .table tbody tr:nth-child(even) {
+        background: #fafafa;
+      }
+
+      .table tbody tr:hover {
+        background-color: var(--neutral-bg);
+      }
+
+      .table .year {
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      .table .amount {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+      }
+
+      .growth-item {
+        padding: 20px;
+        background: #fafafa;
+        border-radius: 8px;
+        border: 1px solid #e5e5e5;
+      }
+
+      .growth-item h3 {
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 12px;
+        font-weight: 500;
+      }
+
+      .growth-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 8px;
+      }
+
+      .growth-detail {
+        font-size: 0.875rem;
+        color: #666;
+      }
+
+      .link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          margin: 0;
+          border-radius: 0;
+        }
+        .header,
+        .content {
+          padding: 30px 24px;
+        }
+        .header h1 {
+          font-size: 2.2rem;
+        }
+        .section h2 {
+          font-size: 1.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>네이버</h1>
+        <div class="subtitle">기업 분석 보고서</div>
+      </div>
+
+      <div class="content">
+        <!-- 기본 정보 -->
+        <div class="section">
+          <h2>기본 정보</h2>
+          <div class="grid grid-4">
+            <div class="card">
+              <h3>설립</h3>
+              <p>1999년</p>
+            </div>
+            <div class="card">
+              <h3>형태</h3>
+              <p>None</p>
+            </div>
+            <div class="card">
+              <h3>상장</h3>
+              <p>비상장기업</p>
+            </div>
+            <div class="card">
+              <h3>직원</h3>
+              <p>4명</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 연락처 정보 -->
+        <div class="section">
+          <h2>연락처</h2>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>웹사이트</h3>
+              <p>
+                <a href="http://www.navercorp.com" class="link"
+                  >http://www.navercorp.com</a
+                >
+              </p>
+            </div>
+            <div class="card">
+              <h3>주소</h3>
+              <p>
+                경기 성남시 분당구 정자일로 95 (정자동, 네이버1784) 네이버 1784
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 비즈니스 -->
+        <div class="section">
+          <h2>비즈니스</h2>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>산업</h3>
+              <p>["포털 및 기타 인터넷 정보매개 서비스업"]</p>
+            </div>
+            <div class="card">
+              <h3>대표이사</h3>
+              <p>최수연</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 회사 소개 -->
+        <div class="section">
+          <h2>회사 소개</h2>
+          <div class="description">
+            <p>None</p>
+          </div>
+        </div>
+
+        <!-- 2024년 실적 -->
+        <div class="section">
+          <h2>2024년 재무 실적</h2>
+
+          <div class="metrics">
+            <div class="metric neutral">매출액<br /><strong>61억</strong></div>
+            <div class="metric positive">
+              영업이익<br /><strong>19억</strong>
+            </div>
+            <div class="metric positive">
+              당기순이익<br /><strong>19억</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 재무 히스토리 -->
+        <div class="section">
+          <h2>재무 히스토리</h2>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>연도</th>
+                <th class="amount">매출액</th>
+                <th class="amount">영업이익</th>
+                <th class="amount">당기순이익</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="year">2022</td>
+                <td class="amount">55억</td>
+                <td class="amount">15억</td>
+                <td class="amount">10억</td>
+              </tr>
+
+              <tr>
+                <td class="year">2023</td>
+                <td class="amount">56억</td>
+                <td class="amount">17억</td>
+                <td class="amount">14억</td>
+              </tr>
+
+              <tr>
+                <td class="year">2024</td>
+                <td class="amount">61억</td>
+                <td class="amount">19억</td>
+                <td class="amount">19억</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

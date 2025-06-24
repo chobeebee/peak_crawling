@@ -1,13 +1,15 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import requests
+import requests.compat
 import re
 import json
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # 기업명에서 (주), (주식회사) 접두사/접미사, 공백 제거
 def filtering_company_name(name):
@@ -120,7 +122,6 @@ def extract_financial_info(driver, company_data):
 
                 # print(f"✅ {field_name} => 년도{year}:{value_str}")
 
-CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 # === 사람인 웹크롤링 === 
@@ -177,9 +178,8 @@ def crawl_from_saramin(search_keyword: str) -> dict:
         chrome_options.add_argument("--log-level=3")
         chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-        service = Service(executable_path=CHROME_DRIVER_PATH)
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        print("✅ Chrome 드라이버 초기화 성공.")
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+        # print("✅ Chrome 드라이버 초기화 성공.")
         
         SARAMIN_BASIC_URL = "https://www.saramin.co.kr"
         # 검색어 URL 인코딩 및 검색 URL 생성
@@ -318,7 +318,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
                 raw_date = founded_element.text.strip() # yyyy-mm-dd 형식
 
                 company_data["established_year"] = raw_date
-                print(f"설립일 = {company_data["established_year"]}")
+                print(f"설립일 = {company_data['established_year']}")
 
             # 회사 요약/설명
             summary_element = soup.select_one('.company_introduce .txt')
