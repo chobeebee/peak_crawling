@@ -1,0 +1,40 @@
+# Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 환경설정 파일
+.env
+*.env
+
+# 가상환경
+venv/
+env/
+.venv/
+.ENV/
+ENV/
+
+# IDE 설정 (VSCode, PyCharm 등)
+.vscode/
+.idea/
+
+# 테스트 / 로그 파일
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# Jupyter Notebook 체크포인트
+.ipynb_checkpoints/
+
+# mypy / pylint / coverage
+.mypy_cache/
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# 파이썬 빌드
+build/
+dist/
+*.egg-info/
