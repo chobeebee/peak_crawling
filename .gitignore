@@ -38,3 +38,7 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+# 예외 처리
+!crawl/ooai.py
+!crawl/
