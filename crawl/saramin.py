@@ -161,7 +161,12 @@ def crawl_from_saramin(search_keyword: str) -> dict:
         "trademark_count": "", # 상표 수
         "ip_details": "", # 지식재산 상세 정보
         "tech_stack": "", # 기술 스택 키워드
-        "recent_news": "" # 최근 뉴스/보도자료
+        "recent_news": "", # 최근 뉴스/보도자료
+        "target_customers": "", # 주요 목표 고객층
+        "competitors": "", # 주요 경쟁사
+        "strengths": "", # 강점
+        "risk_factors": "", # 위험 요인  
+        "recent_trends": "" # 최근 동향
     }
 
     saramin_company_url = ""
