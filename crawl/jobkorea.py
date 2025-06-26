@@ -1,11 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-from datetime import datetime
+from copy import deepcopy
 import json, time
 
 # 공통 유틸 함수
@@ -236,8 +235,42 @@ def parse_company_info(driver) -> dict:
     
     return company_data
 
-# CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+
+# 검색 실패 시 리턴할 기본 템플릿
+basic_template = {
+    "name": "",
+    "established_year": "",
+    "company_type": "",
+    "is_listed": False,
+    "homepage": "",
+    "description": "",
+    "address": "",
+    "industry": "",
+    "products_services": "",
+    "key_executive": "",
+    "employee_count": "",
+    "employee_history": "",
+    "latest_revenue": "",
+    "latest_operating_income": "",
+    "latest_net_income": "",
+    "latest_fiscal_year": "",
+    "financial_history": {},
+    "total_funding": "",
+    "latest_funding_round": "",
+    "latest_funding_date": "",
+    "latest_valuation": "",
+    "investment_history": "",
+    "investors": "",
+    "market_cap": "",
+    "stock_ticker": "",
+    "stock_exchange": "",
+    "patent_count": "",
+    "trademark_count": "",
+    "ip_details": "",
+    "tech_stack": "",
+    "recent_news": ""
+}
 
 def smart_crawl_jobkorea(company_name: str) -> dict:
     print(f"=== '{company_name}' 기업 정보 수집 시작 ===")
@@ -249,6 +282,7 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--enable-unsafe-swiftshader")
+    chrome_options.add_argument("--log-level=3")
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
 
     driver = webdriver.Chrome(options=chrome_options)
@@ -311,7 +345,8 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
                     break
 
         if not info_url:
-            raise Exception(f"'{company_name}'과 일치하는 기업을 찾을 수 없습니다.")
+            print(f"'{company_name}'과 일치하는 기업을 찾을 수 없습니다.")
+            return deepcopy(basic_template)
 
         print("▶ 기업정보 링크:", info_url)
         driver.get(info_url)
@@ -319,15 +354,8 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
         return parse_company_info(driver)
 
     except Exception as e:
-        return {"error": f"기업 정보 수집 실패: {str(e)}"}
+        print(f"[예외 발생] smart_crawl_jobkorea: {e}")
+        return deepcopy(basic_template)
 
     finally:
         driver.quit()
-
-# 실행
-if __name__ == "__main__":
-    company_name = input("회사명을 입력하세요: ")
-    result = smart_crawl_jobkorea(company_name)
-
-    print("\n[기업정보 수집 결과]")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
