@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from common.common_field_template import basic_template
+from config.setting import USER_AGENT
 import json, time
 
 # 공통 유틸 함수
@@ -223,8 +224,6 @@ def parse_company_info(driver) -> dict:
     })
     
     return company_data
-
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 def smart_crawl_jobkorea(company_name: str) -> dict:
     print(f"=== '{company_name}' 기업 정보 수집 시작 ===")
