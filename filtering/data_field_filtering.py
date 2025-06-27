@@ -4,6 +4,8 @@
 import json
 import re
 from decimal import Decimal, InvalidOperation
+from copy import deepcopy
+from common.common_field_template import basic_template
 
 # 금액 단위 숫자 변환
 def korean_currency_to_number(currency_str):
@@ -95,7 +97,7 @@ def filtering_company_info(integration_result: dict) -> dict:
     """
     통합된 기업 정보를 MySQL 스키마에 맞춰 정제.
     """
-    final_data = {} # 최종 정제 데이터
+    final_data = deepcopy(basic_template) # 최종 정제 데이터
 
     # name : varchar(100) 
     final_data['name'] = integration_result.get('name', '').strip()
@@ -231,11 +233,19 @@ def filtering_company_info(integration_result: dict) -> dict:
     # recent_news: json
     final_data['recent_news'] = to_json_string(integration_result.get('recent_news'))
 
-    # created_at: timestamp
-    final_data['created_at'] = integration_result.get('created_at')
-    print(f"final_data['created_at'] = {final_data['created_at']}")
+    # target_customers: varchar
+    final_data['target_customers'] = integration_result.get('target_customers')
 
-    # updated_at: timestamp
-    final_data['updated_at'] = integration_result.get('updated_at')
+    # competitors: varchar
+    final_data['competitors'] = integration_result.get('competitors')
+
+    # strengths: varchar
+    final_data['strengths'] = integration_result.get('strengths')
+
+    # risk_factors: varchar
+    final_data['risk_factors'] = integration_result.get('risk_factors')
+
+    # recent_trends: varchar
+    final_data['recent_trends'] = integration_result.get('recent_trends')
 
     return final_data
