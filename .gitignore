@@ -42,3 +42,4 @@ dist/
 # 예외 처리
 !crawl/ooai.py
 !crawl/
+!*.py

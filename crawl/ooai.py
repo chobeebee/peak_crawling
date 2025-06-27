@@ -3,7 +3,8 @@ import re
 import urllib.parse
 import requests
 import time
-from collections import Counter # 빈도수 계산을 위해 추가
+from collections import Counter # 빈도수 계산을 위해 추가 
+from config.setting import USER_AGENT 
 
 def ooai_crawler(query: str) -> dict:
     """
@@ -53,7 +54,7 @@ def ooai_crawler(query: str) -> dict:
         "cookie": "_variant=stable; lang=ko",
         "origin": "https://oo.ai",
         "referer": f"https://oo.ai/search?q={encoded_query}",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "user-agent": USER_AGENT,
         "x-csrf-token": f"Bearer {token}"
     }
 
