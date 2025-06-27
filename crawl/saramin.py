@@ -9,6 +9,8 @@ import requests
 import re
 import json
 
+from config.setting import CHROME_DRIVER_PATH, USER_AGENT
+
 # 기업명에서 (주), (주식회사) 접두사/접미사, 공백 제거
 def filtering_company_name(name):
     """
@@ -119,9 +121,6 @@ def extract_financial_info(driver, company_data):
                     company_data["financial_history"][year]["자본금"] = value_str
 
                 # print(f"✅ {field_name} => 년도{year}:{value_str}")
-
-CHROME_DRIVER_PATH = "C:\\Users\\okoko\\Downloads\\chromedriver-win64\\chromedriver.exe" # 본인 경로로 수정 필요!
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
 # === 사람인 웹크롤링 === 
 def crawl_from_saramin(search_keyword: str) -> dict:
