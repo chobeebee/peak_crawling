@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -10,8 +15,11 @@ from config.setting import USER_AGENT
 import json, time
 
 # 공통 유틸 함수
-""" 기업정보 영역 """
 def get_info(driver, label: str) -> str:
+    """
+    기업정보 테이블에서 label에 해당하는 값을 추출
+    ex: 설립일, 대표자, 산업 등
+    """
     try:
         rows = driver.find_elements(By.CSS_SELECTOR, "table.table-basic-infomation-primary tr.field")
         for row in rows:
@@ -24,40 +32,10 @@ def get_info(driver, label: str) -> str:
         pass
     return ""
 
-
-""" 재무분석 영역 """
-def get_financial_value(driver, metric: str) -> str:
-    try:
-        cards = driver.find_elements(By.CSS_SELECTOR, "div.financial-analysis-card")
-        for card in cards:
-            header = card.find_element(By.CSS_SELECTOR, "h3.header").text.strip()
-            if metric in header:
-                return card.find_element(By.CSS_SELECTOR, "div.revenue .value").text.strip()
-    except:
-        pass
-    return ""
-
-
-""" 회계연도 추출 """
-def get_latest_fiscal_year(driver) -> str:
-    try:
-        cards = driver.find_elements(By.CSS_SELECTOR, "div.financial-analysis-card")
-        for card in cards:
-            try:
-                update_date = card.find_element(By.CSS_SELECTOR, "div.update").text.strip()
-                year = update_date.split(".")[0]
-
-                if year.isdigit():
-                    return year
-            except:
-                continue
-    except:
-        pass
-    return ""
-
-
-""" 고용현황 영역 """
 def get_employee_history(driver) -> str:
+    """ 
+    고용현황 차트에서 연도별 직원 수 데이터를 추출하여 JSON 문자열로 반환
+    """
     try:
         chart = driver.find_element(By.CSS_SELECTOR, "div.chart-bar-number-of-employees")
         bars = chart.find_elements(By.CSS_SELECTOR, "div.bar")
@@ -74,9 +52,10 @@ def get_employee_history(driver) -> str:
         pass
     return ""
 
-
-""" 근무환경 영역 """
 def get_company_introduction(driver) -> str:
+    """ 
+    근무환경 영역의 기업소개 란의 내용을 한 줄 텍스트로 추출
+    """
     try:
         container = driver.find_element(By.CSS_SELECTOR, "div.working-environment-introduce div.introduce-body")
         html = container.get_attribute("innerHTML")
@@ -87,10 +66,12 @@ def get_company_introduction(driver) -> str:
         return text
     except:
         return ""
-    
 
-""" 재무현황 전체보기 팝업창 """
 def get_financial_history(driver) -> dict:
+    """ 
+    팝업으로 띄워지는 전체 재무현황 테이블에서 연도별 재무 데이터 추출
+    추출 데이터 : "자산 합계", "자본금", "자본금 합계", "매출 액", "영업 이익", "당기순이익"
+    """
     try:
         # 재무현황 전체보기 버튼 클릭
         view_more_btn = WebDriverWait(driver, 10).until(
@@ -127,10 +108,12 @@ def get_financial_history(driver) -> dict:
         return data_by_year
     except:
         return ""
-    
 
-""" 재무분석 카드 그래프 """
 def get_financial_graph(driver) -> dict:
+    """
+    재무분석 카드에 있는 막대 그래프 형태의 재무 데이터를 연도별로 정리함 
+    - 필드명을 정해진 형식으로 변경
+    """
     field_mappings = {
         "총자산 증가율": "자산 합계",
         "매출액": "매출액",
@@ -158,9 +141,11 @@ def get_financial_graph(driver) -> dict:
 
     return financial_data
 
-    
-""" 재무 정보 히스토리 """
 def get_financial_info(driver) -> dict:
+    """
+    재무 정보 수집 함수
+    - 전체보기 버튼 존재 여부에 따라 두 방식 중 하나 선택 
+    """
     try:
         # "재무현황 전체보기" 버튼 존재 여부 확인
         popup_button = driver.find_elements(By.CSS_SELECTOR, "a.button-view-financial-status")
@@ -174,10 +159,19 @@ def get_financial_info(driver) -> dict:
     
     except:
         return {}
-    
-        
-# 기업 정보 페이지 파싱 함수
+
 def parse_company_info(driver) -> dict:
+    """
+    JobKorea 기업 상세 페이지를 분석하여 구조화된 회사 정보를 반환하는 함수
+
+    - WebDriver를 통해 렌더링된 페이지에서 주요 정보를 수집
+    - 회사명, 회사유형, 설립연도, 산업군, 대표자 등 기본 정보 추출
+    - 최근 재무 정보(매출, 영업이익, 순이익, 회계연도)와 히스토리 포함
+    - 결과는 기본 템플릿(basic_template)에 맞춰 딕셔너리 형태로 반환
+
+    Returns:
+        dict: 구조화된 회사 정보 딕셔너리
+    """
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "div.company-body-infomation"))
     )
@@ -225,7 +219,19 @@ def parse_company_info(driver) -> dict:
     
     return company_data
 
+
 def smart_crawl_jobkorea(company_name: str) -> dict:
+    """
+    JobKorea에서 특정 기업의 상세 페이지를 찾고,
+    해당 페이지에서 기업 정보를 크롤링하여 구조화된 데이터 형태로 반환하는 메인 함수
+
+    Args:
+        company_name (str): 검색할 기업명
+
+    Returns:
+        dict: 기본 템플릿 구조를 따르는 기업 정보 딕셔너리 (정보가 없으면 ""으로 채워짐)
+    """
+    
     print(f"=== '{company_name}' 기업 정보 수집 시작 ===")
 
     chrome_options = Options()
@@ -312,3 +318,11 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
 
     finally:
         driver.quit()
+
+# 실행
+if __name__ == "__main__":
+    company_name = input("회사명을 입력하세요: ")
+    result = smart_crawl_jobkorea(company_name)
+
+    print("\n[기업정보 수집 결과]")
+    print(json.dumps(result, indent=2, ensure_ascii=False))
