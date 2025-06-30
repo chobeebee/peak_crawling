@@ -2,8 +2,6 @@ import json
 import re
 import urllib.parse
 import requests
-import time
-from collections import Counter # 빈도수 계산을 위해 추가 
 from config.setting import USER_AGENT 
 from common.ooai_extra_field import ooai_field
 
