@@ -5,20 +5,26 @@ import requests
 import time
 from collections import Counter # 빈도수 계산을 위해 추가 
 from config.setting import USER_AGENT 
+from common.ooai_extra_field import ooai_field
 
 def ooai_crawler(query: str) -> dict:
     """
-    oo.ai에 특정 쿼리 검색하여 검색 결과를 파싱하여 전환
+    oo.ai 웹사이트에 특정 쿼리를 검색하고, 검색 결과를 파싱하여 딕셔너리 형태로 반환
+    CSRF 토큰 추출, 검색 API 호출, SSE 응답 파싱 과정을 포함.
 
     Args:
-    query(str): 검색할 검색어 (예:  "삼성전자 주요 타겟 고객층") 
+    query(str): 검색할 검색어 (예: "삼성전자 주요 타겟 고객층") 
   
     Returns:
-    dict: 검색 결과와 관련된 정보 담은 딕셔너리
+    dict: 검색 결과와 관련된 정보 담은 딕셔너리.
         {
-            'json': {'search_id': ..., 'full_html_answer': ..., 'plain_text_answer': ...}}
+            'json': {
+                'search_id': str,          # 검색 ID (SSE 응답에서 추출)
+                'full_html_answer': str,   # 원본 HTML 형식의 답변 내용
+                'plain_text_answer': str   # HTML 태그가 제거된 순수 텍스트 답변 내용
+            }
         }
-        검색 실패 시 빈 딕셔너리 반환.
+        검색 실패(초기 페이지 접근 오류, CSRF 토큰 없음, 검색 API 호출 오류) 시 빈 딕셔너리 `{}`를 반환.
     """  
     encoded_query = urllib.parse.quote(query)
 
@@ -72,13 +78,21 @@ def ooai_crawler(query: str) -> dict:
 
 def parse_sse_response(stream_data:str) -> dict:
     """
-    SSE 형식의 응답을 파싱하여 최종 답변 추출
+    SSE 형식의 응답을 파싱하여 최종 답변 및 검색 ID를 추출.
+    HTML 태그를 제거한 순수 텍스트 답변도 함께 생성.
 
     Args:
-        stream_data(str) : SEE 형식의 문자열 데이터
+        stream_data(str) : SEE 형식의 문자열 데이터. 각 라인은 'data:'로 시작하며 JSON 객체를 포함.
     
     Returns:
-        dict: 파싱된 검색 결과(search_id, full_html_answer, plain_text_answer)
+        dict: 파싱된 검색 결과가 담긴 딕셔너리.
+            {
+                'json': {
+                    'search_id': str or None,          # 추출된 검색 ID. 없으면 None.
+                    'full_html_answer': str or None,   # 원본 HTML 형식의 답변. 없으면 None.
+                    'plain_text_answer': str or None   # HTML 태그가 제거된 순수 텍스트 답변. 없으면 None.
+                }
+            }
     """
     lines = stream_data.split('\n')
     final_answer_html = None
@@ -117,22 +131,20 @@ def parse_sse_response(stream_data:str) -> dict:
 
 def enrich_company_data(company_name: str, existing_data: dict) -> dict:
     """
-    기존 기업 데이터에서 부족한 필드를 oo.ai 검색을 통해 보완
+    기존에 수집된 기업 데이터에서 비어있는 특정 필드들을 oo.ai 검색을 통해 보완.
+    주요 목표 고객층, 경쟁사, 강점, 위험 요인, 최근 동향 등의 정보를 검색하여 `existing_data`를 업데이트.
+
     Args:
-        company_name(str): 기업명
-        existing_data(dict): 현재까지 수집된 기업 데이터 (필드: 값)
+        company_name(str): 기업명. oo.ai 검색 쿼리를 구성하는 데 사용.
+        existing_data(dict): 현재까지 수집된 기업 데이터가 담긴 딕셔너리.
+                             이 딕셔너리의 비어있는 필드를 보완.(필드: 값)
     
     Returns:
-        dict: oo.ai 검색을 통해 보완된 기업 데이터(추후 통합 데이터와 병합 예정)   
+        dict: oo.ai 검색을 통해 보완된 기업 데이터가 담긴 딕셔너리.
+              새로운 정보가 발견되지 않으면 빈 문자열("")로 채워짐.   
     """
-    # 보완할 필드
-    fields_to_enrich = {
-        "target_customers": f"{company_name} 기업의 주요 목표 고객층",
-        "competitors": f"{company_name} 기업의 주요 경쟁사",
-        "strengths": f"{company_name} 기업의 강점",
-        "risk_factors": f"{company_name} 기업의 위험 요인",
-        "recent_trends": f"{company_name} 기업의 최근 동향"
-    }
+    # oo.ai 보완할 필드 템플릿 적용 
+    fields_to_enrich = ooai_field(company_name)
     
     extra_prompt_guide = "에 대해 다음 가이드라인을 엄수하여 1문장으로 핵심만 요약해 주세요: 1. 불필요한 서론/결론 없이 바로 본론부터 시작. 2. 객관적인 정보만 포함. 3. 가능한 한 수치나 사실 기반으로 서술. 4. ~이다/입니다 체 종결 5. 관련 정보가 없을 경우 텍스트 대신 ''으로 출력."
     
