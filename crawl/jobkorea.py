@@ -13,6 +13,7 @@ from copy import deepcopy
 from common.common_field_template import basic_template
 from config.setting import USER_AGENT
 import json, time
+from webdriver_manager.chrome import ChromeDriverManager
 
 # 공통 유틸 함수
 def get_info(driver, label: str) -> str:
@@ -244,7 +245,7 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_argument(f"user-agent={USER_AGENT}")
 
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(service=webdriver.ChromeService(ChromeDriverManager().install()), options=chrome_options)
 
     # 회사명 비교를 위한 정규화 함수
     def normalize(text: str) -> str:
