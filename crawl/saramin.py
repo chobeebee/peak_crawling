@@ -15,29 +15,37 @@ from config.setting import CHROME_DRIVER_PATH, USER_AGENT
 from common.common_field_template import basic_template
 
 # 기업명에서 (주), (주식회사) 접두사/접미사, 공백 제거
-def filtering_company_name(name):
+def filtering_company_name(name: str) -> str:
     """
     회사 이름에서 (주), (주식회사) 등 접두사/접미사 및 공백 제거
+    Args:
+        name(str): 검색 결과 기업명 (예: "삼성전자(주)") 
+  
+    Returns:
+        str: 주식회사 등 접두사/미사 제외한 기업명만 (예: "삼성전자")
     """
     # print(f"=== filtering_company_name 함수 실행 ===")
     removal_inc = re.sub(r'\(주\)', '', name, flags=re.IGNORECASE)
     removal_inc = re.sub(r'\(주식회사\)', '', removal_inc, flags=re.IGNORECASE)
-
     removal_inc = re.sub(r'\s+', ' ', removal_inc).strip()
 
-    # print(f"filtering_company_name 함수 결과: {removal_inc}")
     return removal_inc
 
-# 기업명 검색, 검색된 기업명 비교
-def compare_company_name(searching_keyword, searched_company):
+# 검색한 기업명과 검색 결과의 기업명 비교
+def compare_company_name(searching_keyword, searched_company: str):
     """
     두 회사 이름을 (주), (주식회사) 등의 문자열을 제외하고 비교
+    Args:
+        searching_keyword(str): 검색한 기업명 (예: "삼성전자") 
+        searched_company(str): 검색 결과 기업명 (예: "삼성전자(주)") 
+  
+    Returns:
+        bool: 기업명 동일 여부(True/False)
     """
     # print(f"=== compare_company_name 함수 실행 ===")
     filtered_company_name = filtering_company_name(searched_company)
-
     result = searching_keyword == filtered_company_name
-    # print(f"searching_keyword == filtered_company_name 결과={result}")
+
     return result
 
 
@@ -45,6 +53,14 @@ def compare_company_name(searching_keyword, searched_company):
 def get_financial_info_after_button(driver, target_button_text, wait_time=10):
     """
     재무정보 버튼을 클릭하고 재무현황 데이터 수집함. 
+    Args:
+        driver (webdriver.Chrome): Selenium 웹 드라이버 인스턴스.
+        target_button_text (str): 클릭할 버튼에 표시된 텍스트 (예: "재무정보").
+        wait_time (int, optional): 페이지 요소가 나타날 때까지 기다릴 최대 시간(초).
+  
+    Returns:
+        BeautifulSoup: 재무 정보 탭으로 이동한 후의 웹 페이지 HTML을 파싱한 BeautifulSoup 객체.
+                       버튼을 찾지 못하거나 오류 발생 시 None을 반환.
     """
     print(f"=== get_financial_info_after_button 함수 실행 ===")
     try:
@@ -85,6 +101,14 @@ def get_financial_info_after_button(driver, target_button_text, wait_time=10):
 def extract_financial_info(driver, company_data):
     """
     재무현황(매출, 영업이익, 순이익, 자본금)에 대한 재무정보 데이터 추출
+    Args:
+        driver (webdriver.Chrome): Selenium 웹 드라이버 인스턴스.
+        company_data (dict): 기업 정보가 저장될 딕셔너리. 추출된 재무 데이터는 'financial_history' 키 아래에 추가됨.
+                             'financial_history'는 {년도: {필드명: 값}} 형태의 중첩 딕셔너리.
+    
+    Returns:
+        None: 함수는 직접 값을 반환하지 않고, `company_data` 딕셔너리를 직접 수정.
+    
     """
     # print(f"=== extract_financial_info 함수 실행 ===")
     # 재무정보 탭으로 이동
@@ -99,7 +123,6 @@ def extract_financial_info(driver, company_data):
         if not field_name_tag:
             continue
         field_name = field_name_tag.text.strip()
-        # print(f"👉 field_name = {field_name}")
 
         # 해당 재무 필드의 연도별 데이터 추출
         area_graph = box_finance.find('div', class_='area_graph')
@@ -129,9 +152,15 @@ def extract_financial_info(driver, company_data):
 def crawl_from_saramin(search_keyword: str) -> dict:
     """
     사람인 웹사이트에서 기업 정보를 크롤링하여 딕셔너리 형태로 반환
+    Args:
+        search_keyword (str): 사람인에서 검색할 기업의 이름.
+    Returns:
+        dict: 크롤링된 기업 정보가 담긴 딕셔너리.
+              검색 결과가 없거나 오류 발생 시, 기본 템플릿에 해당하는 정보만 포함.
     """
     print(f"=== crawl_from_saramin 함수 실행 - '{search_keyword}' 기업 정보 수집 시작 ===")
 
+    # 공통 필드 템플릿 적용 
     company_data = deepcopy(basic_template)
 
     saramin_company_url = ""
