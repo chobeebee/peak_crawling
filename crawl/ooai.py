@@ -159,7 +159,7 @@ def enrich_company_data(company_name: str, existing_data: dict) -> dict:
             if search_result and search_result['json'].get('plain_text_answer'):
                 answer = search_result['json']['plain_text_answer']
                 final_data[field] = answer
-                print(f"✅'{field}' 필드 채움: {answer[:50]}...") # 너무 길면 잘라서 출력
+                print(f"✅'{field}' 필드 채움")
             else:
                 print(f"❌ '{field}' 필드에 대한 OO.ai 검색 결과가 없거나 유효하지 않습니다.")
                 final_data[field] = ""
