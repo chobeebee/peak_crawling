@@ -1,8 +1,3 @@
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -319,11 +314,3 @@ def smart_crawl_jobkorea(company_name: str) -> dict:
 
     finally:
         driver.quit()
-
-# 실행
-if __name__ == "__main__":
-    company_name = input("회사명을 입력하세요: ")
-    result = smart_crawl_jobkorea(company_name)
-
-    print("\n[기업정보 수집 결과]")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
