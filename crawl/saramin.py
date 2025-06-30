@@ -318,7 +318,7 @@ def crawl_from_saramin(search_keyword: str) -> dict:
                 raw_date = founded_element.text.strip() # yyyy-mm-dd 형식
 
                 company_data["established_year"] = raw_date
-                print(f"설립일 = {company_data.established_year}")
+                print(f"설립일 = {raw_date}")
 
             # 회사 요약/설명
             summary_element = soup.select_one('.company_introduce .txt')
