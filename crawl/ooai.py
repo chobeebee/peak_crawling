@@ -148,38 +148,18 @@ def enrich_company_data(company_name: str, existing_data: dict) -> dict:
     
     extra_prompt_guide = "에 대해 다음 가이드라인을 엄수하여 1문장으로 핵심만 요약해 주세요: 1. 불필요한 서론/결론 없이 바로 본론부터 시작. 2. 객관적인 정보만 포함. 3. 가능한 한 수치나 사실 기반으로 서술. 4. ~이다/입니다 체 종결 5. 관련 정보가 없을 경우 텍스트 대신 ''으로 출력."
     
-    # 동일 쿼리 반복 실행 횟수
-    NUM_RETRIES = 3 # 여러 번 호출하여 일관성 확보
-
     final_data = existing_data.copy()
 
     for field, query_template in fields_to_enrich.items():
         # 현재 필드 값이 비어있는지 확인
         if not final_data.get(field):
             print(f"🔍'{field}' 필드가 비어있습니다. OO.ai에서 검색을 시도합니다: '{query_template}'")
+            search_result = ooai_crawler(query_template + extra_prompt_guide)
             
-            collected_answers = []
-            for i in range(NUM_RETRIES):
-                print(f"  > 시도 {i+1}/{NUM_RETRIES}...")
-                search_result = ooai_crawler(query_template + extra_prompt_guide)
-                if search_result and search_result['json'].get('plain_text_answer'):
-                    answer = search_result['json']['plain_text_answer'].strip()
-                    if answer: # 빈 문자열이 아닌 유효한 답변만 추가
-                        collected_answers.append(answer)
-                # 약간의 딜레이를 주어 API 호출 간격을 띄움
-                time.sleep(3)
-
-            if collected_answers:
-                # 가장 빈번하게 나온 답변 선택 (다양한 답변이 나올 경우 첫 번째 선택)
-                # Counter를 사용하여 각 답변의 빈도수를 세고, 가장 많은 빈도수를 가진 답변을 선택
-                most_common_answer = Counter(collected_answers).most_common(1)
-                if most_common_answer:
-                    chosen_answer = most_common_answer[0][0]
-                    final_data[field] = chosen_answer
-                    print(f"✅'{field}' 필드 채움 (최다빈도): {chosen_answer[:50]}...")
-                else: # Counter가 비어있다면 (불가능한 경우지만 방어 코드)
-                    print(f"❌ '{field}' 필드에 대한 OO.ai 검색 결과가 일관되지 않거나 유효하지 않습니다.")
-                    final_data[field] = ""
+            if search_result and search_result['json'].get('plain_text_answer'):
+                answer = search_result['json']['plain_text_answer']
+                final_data[field] = answer
+                print(f"✅'{field}' 필드 채움: {answer[:50]}...") # 너무 길면 잘라서 출력
             else:
                 print(f"❌ '{field}' 필드에 대한 OO.ai 검색 결과가 없거나 유효하지 않습니다.")
                 final_data[field] = ""
